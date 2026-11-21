@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#18212a"/>
+      <stop offset="1" stop-color="#0e1419"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#sky)"/>
+  <path d="M0 450 240 210l150 150 155-205 205 250 150-150 300 235v140H0Z" fill="#26333f"/>
+  <path d="m240 210 74 74-74-27-86 49Zm305-55 91 110-91-36-72 47Zm355 100 59 57-59-20-53 36Z" fill="#e8eef3" opacity=".88"/>
+  <circle cx="1040" cy="115" r="48" fill="#4db2e8" opacity=".9"/>
+  <text x="76" y="490" fill="#e8eef3" font-family="system-ui, sans-serif" font-size="62" font-weight="700">Haute Maurienne Vanoise</text>
+  <text x="80" y="550" fill="#8fa3b3" font-family="system-ui, sans-serif" font-size="34">Webcams en direct · Val Cenis · Aussois · Bessans · Bonneval-sur-Arc</text>
+</svg>

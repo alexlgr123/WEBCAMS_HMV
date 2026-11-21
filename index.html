@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0e1419">
+<meta name="description" content="Consultez les webcams en direct de Val Cenis, Aussois, Bessans et Bonneval-sur-Arc en Haute Maurienne Vanoise.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Haute Maurienne — Webcams en direct">
+<meta property="og:description" content="Les webcams des stations de Haute Maurienne Vanoise, réunies sur une seule page.">
+<!-- Image de partage : une fois le site en ligne, remplacer "preview.jpg" par l'adresse complète
+     (ex. https://mon-site.fr/preview.jpg) ici et dans twitter:image — Facebook/WhatsApp l'exigent. -->
+<meta property="og:image" content="preview.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Webcams de Haute Maurienne Vanoise : Val Cenis, Aussois, Bessans et Bonneval-sur-Arc">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Haute Maurienne — Webcams en direct">
+<meta name="twitter:description" content="Consultez les webcams de Val Cenis, Aussois, Bessans et Bonneval-sur-Arc.">
+<meta name="twitter:image" content="preview.jpg">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>Haute Maurienne — Webcams en direct</title>
+<style>
+  :root {
+    --bg: #0e1419;
+    --card: #18212a;
+    --border: #26333f;
+    --text: #e8eef3;
+    --muted: #8fa3b3;
+    --accent: #4db2e8;
+    --ok: #3ecf8e;
+    --err: #e85d5d;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  header {
+    padding: 24px 20px 8px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  h1 { margin: 0 0 4px; font-size: 1.6rem; letter-spacing: 0.3px; }
+  h1 .live-dot {
+    display: inline-block;
+    width: 10px; height: 10px;
+    background: var(--err);
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.3 } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+  }
+  .subtitle { color: var(--muted); font-size: 0.95rem; }
+  nav {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 14px;
+  }
+  nav a {
+    color: var(--accent);
+    text-decoration: none;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+  }
+  nav a:hover { border-color: var(--accent); }
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    margin-top: 14px;
+  }
+  .filter-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 14px; }
+  .filter-controls label { color: var(--muted); font-size: 0.85rem; }
+  .filter-controls input { background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 0.9rem; }
+  .favorite-toggle { border: 1px solid var(--border); background: transparent; color: var(--accent); border-radius: 7px; padding: 5px 9px; font-size: 0.85rem; }
+  .favorite-toggle[aria-pressed="true"] { color: #ffd166; border-color: #ffd166; }
+  .empty-state { padding: 20px; color: var(--muted); text-align: center; }
+  button, select {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); }
+  select:focus, button:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  label.freq { color: var(--muted); font-size: 0.85rem; }
+  .controls .note, .refresh-time { color: var(--muted); font-size: 0.8rem; }
+  .refresh-time { flex-basis: 100%; }
+  .frame-fallback { padding: 10px 16px; color: var(--muted); font-size: 0.85rem; }
+  .frame-fallback a { color: var(--accent); }
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 12px 20px 40px;
+  }
+  section.station { margin-top: 28px; }
+  .station-title {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+  }
+  .station-title h2 { margin: 0; font-size: 1.25rem; }
+  .station-title .source { color: var(--muted); font-size: 0.8rem; }
+  .cams {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .cams.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 900px) {
+    .cams.grid-2 { grid-template-columns: 1fr; }
+  }
+  .cam {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .cam-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 12px 16px;
+  }
+  .cam-name { font-weight: 600; font-size: 1.05rem; }
+  .cam-alt {
+    color: var(--accent);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .status {
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .status.ok { color: var(--ok); }
+  .status.err { color: var(--err); }
+  .img-wrap {
+    position: relative;
+    background: #000;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .img-wrap img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .img-wrap img.hidden { display: none; }
+  .spinner {
+    position: absolute;
+    width: 28px; height: 28px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg) } }
+  .spinner.hidden, .err-msg.hidden { display: none; }
+  .err-msg { color: var(--err); font-size: 0.9rem; padding: 20px; }
+  .frame-wrap {
+    position: relative;
+    background: #000;
+    height: 460px;
+  }
+  @media (max-width: 700px) {
+    .frame-wrap { height: 300px; }
+  }
+  .frame-wrap iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  footer {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px 30px;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* ---------- Adaptation mobile ---------- */
+  .cam-head { flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+  .station-title { flex-wrap: wrap; gap: 4px 12px; }
+  .pano-hint { margin: 0; padding: 6px 12px 10px; color: var(--muted); font-size: 0.8rem; }
+  .pano-hint[hidden] { display: none; }
+
+  @media (max-width: 700px) {
+    header { padding: 16px 14px 6px; }
+    main { padding: 8px 14px 32px; }
+    footer { padding: 0 14px 24px; line-height: 1.6; }
+    h1 { font-size: 1.25rem; line-height: 1.3; }
+    .subtitle { font-size: 0.875rem; }
+    nav a { padding: 8px 14px; }
+    .filter-controls, .controls { flex-direction: column; align-items: stretch; gap: 12px; }
+    .filter-controls label, label.freq { display: flex; flex-direction: column; gap: 4px; }
+    .filter-controls label.fav-only { flex-direction: row; align-items: center; gap: 10px; min-height: 44px; }
+    #favorites-only { width: 22px; height: 22px; margin: 0; accent-color: var(--accent); }
+    /* 16px minimum : évite le zoom automatique d'iOS sur les champs */
+    .filter-controls input[type="search"], select, #refresh-all { width: 100%; min-height: 44px; font-size: 16px; }
+    section.station { margin-top: 22px; }
+    .station-title h2 { font-size: 1.15rem; }
+    .cams, .cams.grid-2 { gap: 16px; }
+    .cam-head { padding: 10px 12px; }
+    .cam-name { font-size: 1rem; }
+    .favorite-toggle { min-height: 36px; padding: 6px 10px; }
+    .status { flex-basis: 100%; }
+  }
+
+  /* Panoramas : on garde une hauteur lisible et on fait défiler horizontalement */
+  @media (max-width: 700px), (max-height: 500px) and (orientation: landscape) {
+    .img-wrap.pano {
+      display: block;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      min-height: 240px;
+    }
+    .img-wrap.pano img { width: auto; max-width: none; height: 240px; }
+    .img-wrap.pano .spinner { top: calc(50% - 14px); left: calc(50% - 14px); }
+  }
+  @media (max-height: 500px) and (orientation: landscape) {
+    .img-wrap.pano { min-height: 65vh; }
+    .img-wrap.pano img { height: 65vh; }
+    .frame-wrap { height: 75vh; }
+  }
+
+  /* ---------- Visionneuse plein écran ---------- */
+  .img-wrap img { cursor: zoom-in; }
+  .fs-toggle { border: 1px solid var(--border); background: transparent; color: var(--accent); border-radius: 7px; padding: 5px 9px; font-size: 0.85rem; }
+  .viewer { position: fixed; inset: 0; z-index: 1000; background: #000; color: var(--text); }
+  .viewer[hidden] { display: none; }
+  .viewer-stage { position: absolute; inset: 0; overflow: hidden; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+  .viewer-stage.dragging { cursor: grabbing; }
+  .viewer-stage img { position: absolute; left: 0; top: 0; max-width: none; transform-origin: 0 0; will-change: transform; -webkit-user-drag: none; pointer-events: none; }
+  .viewer-bar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 1;
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 24px max(12px, env(safe-area-inset-left));
+    background: linear-gradient(rgba(0,0,0,.75), rgba(0,0,0,0));
+  }
+  .viewer-title { font-weight: 600; font-size: 1rem; text-shadow: 0 1px 3px #000; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .viewer-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  .viewer-actions button { min-width: 44px; min-height: 44px; padding: 0 10px; font-size: 1.15rem; line-height: 1; background: rgba(24,33,42,.85); }
+  .viewer-hint {
+    position: absolute; left: 50%; bottom: max(14px, env(safe-area-inset-bottom)); transform: translateX(-50%);
+    max-width: calc(100% - 24px); text-align: center;
+    background: rgba(0,0,0,.65); color: var(--text); padding: 7px 14px; border-radius: 999px; font-size: 0.8rem;
+    pointer-events: none; transition: opacity .5s;
+  }
+  .viewer-hint.faded { opacity: 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span class="live-dot"></span>Haute Maurienne Vanoise — Webcams en direct</h1>
+  <div class="subtitle">Val Cenis · Aussois · Bessans · Bonneval-sur-Arc — images actualisées automatiquement.</div>
+  <nav aria-label="Navigation des stations">
+    <a href="#valcenis">Val Cenis</a>
+    <a href="#aussois">Aussois</a>
+    <a href="#bessans">Bessans</a>
+    <a href="#bonneval">Bonneval-sur-Arc</a>
+  </nav>
+  <div class="filter-controls" aria-label="Filtres des webcams">
+    <label for="station-filter">Station :
+      <select id="station-filter">
+        <option value="all">Toutes les stations</option>
+      </select>
+    </label>
+    <label for="camera-search">Rechercher une caméra :
+      <input id="camera-search" type="search" placeholder="Ex. sommet, village" autocomplete="off">
+    </label>
+    <label class="fav-only"><input id="favorites-only" type="checkbox"> Favoris uniquement</label>
+  </div>
+  <div class="controls">
+    <button id="refresh-all">Actualiser les images</button>
+    <label class="freq" for="freq">Actualisation :
+      <select id="freq">
+        <option value="30000">30 s</option>
+        <option value="60000" selected>1 min</option>
+        <option value="300000">5 min</option>
+        <option value="0">Désactivée</option>
+      </select>
+    </label>
+    <span class="note">Val Cenis et Bessans : images rafraîchies. Aussois et Bonneval : lecteurs interactifs auto-actualisés.</span>
+    <span id="refresh-time" class="refresh-time" aria-live="polite">Aucune actualisation effectuée.</span>
+  </div>
+</header>
+
+<main id="root"></main>
+
+<footer>
+  Sources : <a href="https://www.valcenis.com/webcams/" target="_blank" rel="noopener">valcenis.com</a>,
+  <a href="https://www.aussois.com/webcam/" target="_blank" rel="noopener">aussois.com</a>,
+  <a href="https://www.bessans.com/webcam/" target="_blank" rel="noopener">bessans.com</a>,
+  <a href="https://www.bonneval-sur-arc.com/webcam/" target="_blank" rel="noopener">bonneval-sur-arc.com</a>
+  — flux webcam-hd, skaping et viewsurf. Site non officiel, à but de visualisation.
+</footer>
+
+<script>
+"use strict";
+
+// type "image" : panorama JPEG rafraîchi par l'application (webcam-hd)
+// type "iframe" : lecteur du fournisseur, auto-actualisé (skaping / viewsurf)
+const STATIONS = [
+  {
+    id: "valcenis",
+    name: "Val Cenis",
+    source: "flux webcam-hd",
+    layout: "stack",
+    cams: [
+      { id: "la-met", name: "La Met", alt: "2 800 m", type: "image",
+        url: "https://app.webcam-hd.com/api/webcam-image/panorama/valcenis_la-met/mega_valcenis_la-met.jpg?config=127" },
+      { id: "sommet-solert", name: "Sommet du Solert", alt: "2 540 m", type: "image",
+        url: "https://app.webcam-hd.com/api/webcam-image/panorama/valcenis_sommet-solert/mega_valcenis_sommet-solert.jpg?config=124" },
+      { id: "tk-pont-noir", name: "Téléski du Pont Noir", alt: "1 480 m", type: "image",
+        url: "https://app.webcam-hd.com/api/webcam-image/panorama/valcenis_tk-pont-noir/mega_valcenis_tk-pont-noir.jpg?config=128" }
+    ]
+  },
+  {
+    id: "aussois",
+    name: "Aussois",
+    source: "lecteurs skaping",
+    layout: "grid-2",
+    cams: [
+      { id: "armoise", name: "Sommet de l'Armoise", alt: "2 610 m", type: "iframe",
+        url: "https://www.skaping.com/aussois/sommet-armoise" },
+      { id: "grand-jeu", name: "Sommet du Grand Jeu", alt: "2 150 m", type: "iframe",
+        url: "https://www.skaping.com/aussois/sommet-grand-jeu" },
+      { id: "monolithe", name: "Domaine nordique du Monolithe", alt: "1 600 m", type: "iframe",
+        url: "https://www.skaping.com/aussois/domaine-nordique-du-monolithe" },
+      { id: "front-neige", name: "Front de neige", alt: "1 530 m", type: "iframe",
+        url: "https://www.skaping.com/aussois/front-de-neige" },
+      { id: "village", name: "Le Village", alt: "1 500 m", type: "iframe",
+        url: "https://www.skaping.com/aussois/le-village" }
+    ]
+  },
+  {
+    id: "bessans",
+    name: "Bessans",
+    source: "flux webcam-hd",
+    layout: "stack",
+    cams: [
+      { id: "saigniere", name: "Panoramique de la Saignière", alt: "2 000 m", type: "image",
+        url: "https://app.webcam-hd.com/api/webcam-image/panorama/bessans_relais/mega_bessans_relais.jpg?config=276" },
+      { id: "bessannaise", name: "La Bessannaise", alt: "1 740 m", type: "image",
+        url: "https://app.webcam-hd.com/api/webcam-image/panorama/bessans_la-bessannaise/mega_bessans_la-bessannaise.jpg?config=274" },
+      { id: "carreley", name: "Le Carreley", alt: "1 730 m", type: "image",
+        url: "https://app.webcam-hd.com/api/webcam-image/panorama/bessans_carreley/mega_bessans_carreley.jpg?config=275" }
+    ]
+  },
+  {
+    id: "bonneval",
+    name: "Bonneval-sur-Arc",
+    source: "lecteurs viewsurf",
+    layout: "grid-2",
+    cams: [
+      { id: "andagne", name: "Andagne", alt: "2 400 m", type: "iframe",
+        url: "https://pv.viewsurf.com/1496/Bonneval-Andagne?i=NTk3ODo" },
+      { id: "vallonnet", name: "Le Vallonnet", alt: "2 000 m", type: "iframe",
+        url: "https://pv.viewsurf.com/72/Bonneval-sur-Arc?i=MTUwOg" },
+      { id: "village", name: "Le Village", alt: "1 800 m", type: "iframe",
+        url: "https://broadcast.viewsurf.com/7c939fabfe29bbdb9f2762b3b3392e2e/capture/13302/playEmbed" }
+    ]
+  }
+];
+
+const root = document.getElementById("root");
+const imageEntries = [];
+const cameraCards = new Map();
+const favoriteStorageKey = "haute-maurienne-webcam-favorites";
+let favorites = readFavorites();
+
+function readFavorites() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(favoriteStorageKey) || "[]");
+    return new Set(Array.isArray(stored) ? stored.filter((id) => typeof id === "string") : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function el(tag, className, parent) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (parent) parent.appendChild(node);
+  return node;
+}
+
+// ---------- Visionneuse plein écran : glisser, pincer, molette, double-tap ----------
+const viewer = (() => {
+  const box = el("div", "viewer", document.body);
+  box.hidden = true;
+  box.setAttribute("role", "dialog");
+  box.setAttribute("aria-modal", "true");
+  box.setAttribute("aria-label", "Panorama en plein écran");
+  const stage = el("div", "viewer-stage", box);
+  const pic = el("img", null, stage);
+  pic.draggable = false;
+  const bar = el("div", "viewer-bar", box);
+  const title = el("span", "viewer-title", bar);
+  const actions = el("div", "viewer-actions", bar);
+  const hint = el("div", "viewer-hint", box);
+  hint.textContent = "Glissez pour vous déplacer · pincez, molette ou double-tap pour zoomer";
+
+  function makeButton(label, text, onClick) {
+    const b = el("button", null, actions);
+    b.type = "button";
+    b.title = label;
+    b.setAttribute("aria-label", label);
+    b.textContent = text;
+    b.addEventListener("click", onClick);
+    return b;
+  }
+  makeButton("Dézoomer", "−", () => zoomBy(1 / 1.5));
+  makeButton("Zoomer", "+", () => zoomBy(1.5));
+  makeButton("Voir tout le panorama", "⤢", overview);
+  const closeButton = makeButton("Fermer", "✕", () => close());
+
+  let scale = 1, tx = 0, ty = 0, minScale = 1, fillScale = 1, maxScale = 4;
+  let current = null, isOpen = false, needsFit = false, pushedHistory = false, lastFocus = null, hintTimer = null;
+  const pointers = new Map();
+  let pinch = null, tap = null, lastTapTime = 0, lastTapPos = null, lastTouchZoom = 0;
+
+  const view = () => ({ w: stage.clientWidth, h: stage.clientHeight });
+  const natural = () => ({ w: pic.naturalWidth || 1, h: pic.naturalHeight || 1 });
+
+  function computeScales() {
+    const v = view(), n = natural();
+    minScale = Math.min(v.w / n.w, v.h / n.h);   // panorama entier visible
+    // Vue de départ : toute la hauteur en paysage, un peu plus de la moitié en portrait
+    // (sinon on ne verrait qu'une tranche du panorama).
+    const portrait = v.h > v.w;
+    fillScale = Math.max(minScale, (portrait ? v.h * 0.55 : v.h) / n.h);
+    maxScale = Math.max((v.h / n.h) * 4, 1);
+  }
+  function apply() {
+    const v = view(), n = natural();
+    const w = n.w * scale, h = n.h * scale;
+    tx = w <= v.w ? (v.w - w) / 2 : Math.min(0, Math.max(v.w - w, tx));
+    ty = h <= v.h ? (v.h - h) / 2 : Math.min(0, Math.max(v.h - h, ty));
+    pic.style.transform = "translate(" + tx + "px," + ty + "px) scale(" + scale + ")";
+  }
+  function zoomAt(newScale, cx, cy) {
+    newScale = Math.min(maxScale, Math.max(minScale, newScale));
+    tx = cx - (cx - tx) * newScale / scale;
+    ty = cy - (cy - ty) * newScale / scale;
+    scale = newScale;
+    apply();
+  }
+  function zoomBy(factor) { const v = view(); zoomAt(scale * factor, v.w / 2, v.h / 2); }
+  function fit() {
+    computeScales();
+    const v = view(), n = natural();
+    scale = fillScale;
+    tx = (v.w - n.w * scale) / 2;   // centré sur le milieu du panorama
+    ty = 0;
+    apply();
+  }
+  function overview() { computeScales(); scale = minScale; apply(); }
+  function toggleZoom(x, y) {
+    if (scale > fillScale * 1.2) fit();
+    else zoomAt(fillScale * 2.5, x, y);
+  }
+
+  pic.addEventListener("load", () => {
+    if (needsFit) { needsFit = false; fit(); } else if (isOpen) { computeScales(); apply(); }
+  });
+
+  function open(entry) {
+    if (!entry.img.naturalWidth) return;
+    current = entry;
+    isOpen = true;
+    lastFocus = document.activeElement;
+    title.textContent = entry.cam.name + " · " + entry.cam.alt;
+    pic.alt = entry.img.alt;
+    box.hidden = false;
+    document.body.style.overflow = "hidden";
+    if (pic.src === entry.img.src && pic.complete && pic.naturalWidth) fit();
+    else { needsFit = true; pic.src = entry.img.src; }
+    hint.textContent = "Glissez pour vous déplacer · pincez, molette ou double-tap pour zoomer"
+      + (window.innerHeight > window.innerWidth && "ontouchstart" in window ? " · tournez le téléphone pour une vue plus large" : "");
+    hint.classList.remove("faded");
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(() => hint.classList.add("faded"), 4000);
+    try { history.pushState({ panoViewer: true }, ""); pushedHistory = true; } catch { pushedHistory = false; }
+    closeButton.focus();
+  }
+  function close(fromHistory = false) {
+    if (!isOpen) return;
+    isOpen = false;
+    current = null;
+    box.hidden = true;
+    document.body.style.overflow = "";
+    pointers.clear();
+    pinch = null;
+    if (!fromHistory && pushedHistory) history.back();
+    pushedHistory = false;
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  // Bouton « retour » du téléphone : ferme la visionneuse au lieu de quitter la page.
+  window.addEventListener("popstate", () => { if (isOpen) { pushedHistory = false; close(true); } });
+
+  // Garde l'image à jour pendant l'actualisation automatique.
+  function refresh(entry) {
+    if (isOpen && current === entry && pic.src !== entry.img.src) pic.src = entry.img.src;
+  }
+
+  const localPoint = (p) => { const r = stage.getBoundingClientRect(); return { x: p.x - r.left, y: p.y - r.top }; };
+  const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  const middle = (a, b) => localPoint({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+
+  stage.addEventListener("pointerdown", (e) => {
+    stage.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    stage.classList.add("dragging");
+    if (pointers.size === 1) tap = { x: e.clientX, y: e.clientY, t: Date.now(), moved: false };
+    if (pointers.size === 2) {
+      const [a, b] = [...pointers.values()];
+      pinch = { d: distance(a, b), scale, mid: middle(a, b) };
+      tap = null;
+    }
+  });
+  stage.addEventListener("pointermove", (e) => {
+    if (!pointers.has(e.pointerId)) return;
+    const prev = pointers.get(e.pointerId);
+    const cur = { x: e.clientX, y: e.clientY };
+    pointers.set(e.pointerId, cur);
+    if (tap && Math.hypot(cur.x - tap.x, cur.y - tap.y) > 10) tap.moved = true;
+    if (pointers.size === 1) {
+      tx += cur.x - prev.x;
+      ty += cur.y - prev.y;
+      apply();
+    } else if (pointers.size === 2 && pinch) {
+      const [a, b] = [...pointers.values()];
+      const mid = middle(a, b);
+      tx += mid.x - pinch.mid.x;
+      ty += mid.y - pinch.mid.y;
+      pinch.mid = mid;
+      zoomAt(pinch.scale * distance(a, b) / pinch.d, mid.x, mid.y);
+    }
+  });
+  function endPointer(e) {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.delete(e.pointerId);
+    if (pointers.size < 2) pinch = null;
+    if (pointers.size === 0) stage.classList.remove("dragging");
+    // Double-tap tactile
+    if (e.type === "pointerup" && e.pointerType !== "mouse" && tap && !tap.moved && Date.now() - tap.t < 300) {
+      const now = Date.now();
+      const pos = { x: e.clientX, y: e.clientY };
+      if (now - lastTapTime < 320 && lastTapPos && Math.hypot(pos.x - lastTapPos.x, pos.y - lastTapPos.y) < 40) {
+        const p = localPoint(pos);
+        toggleZoom(p.x, p.y);
+        lastTapTime = 0;
+        lastTouchZoom = now;
+      } else {
+        lastTapTime = now;
+        lastTapPos = pos;
+      }
+    }
+    if (pointers.size === 0) tap = null;
+  }
+  stage.addEventListener("pointerup", endPointer);
+  stage.addEventListener("pointercancel", endPointer);
+  stage.addEventListener("dblclick", (e) => {
+    if (Date.now() - lastTouchZoom < 600) return;
+    const p = localPoint({ x: e.clientX, y: e.clientY });
+    toggleZoom(p.x, p.y);
+  });
+  stage.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const p = localPoint({ x: e.clientX, y: e.clientY });
+    zoomAt(scale * Math.exp(-e.deltaY * 0.0015), p.x, p.y);
+  }, { passive: false });
+
+  box.addEventListener("keydown", (e) => {
+    const step = 80;
+    if (e.key === "Escape") { e.preventDefault(); close(); }
+    else if (e.key === "+" || e.key === "=") zoomBy(1.25);
+    else if (e.key === "-") zoomBy(0.8);
+    else if (e.key === "0") fit();
+    else if (e.key === "ArrowLeft") { tx += step; apply(); }
+    else if (e.key === "ArrowRight") { tx -= step; apply(); }
+    else if (e.key === "ArrowUp") { ty += step; apply(); }
+    else if (e.key === "ArrowDown") { ty -= step; apply(); }
+    else if (e.key === "Tab") {
+      // Garde le focus dans la visionneuse
+      const buttons = [...actions.querySelectorAll("button")];
+      const i = buttons.indexOf(document.activeElement);
+      e.preventDefault();
+      buttons[(i + (e.shiftKey ? -1 : 1) + buttons.length) % buttons.length].focus();
+    }
+  });
+  window.addEventListener("resize", () => { if (isOpen) fit(); });
+
+  return { open, close, refresh };
+})();
+
+const stationFilter = document.getElementById("station-filter");
+for (const station of STATIONS) {
+  const option = el("option", null, stationFilter);
+  option.value = station.id;
+  option.textContent = station.name;
+}
+
+for (const station of STATIONS) {
+  const section = el("section", "station", root);
+  section.id = station.id;
+
+  const head = el("div", "station-title", section);
+  el("h2", null, head).textContent = station.name;
+  el("span", "source", head).textContent = station.source;
+
+  const cams = el("div", "cams " + (station.layout === "grid-2" ? "grid-2" : ""), section);
+
+  for (const cam of station.cams) {
+    const card = el("article", "cam", cams);
+    cameraCards.set(cam.id, card);
+    card.dataset.cameraName = cam.name.toLocaleLowerCase("fr");
+    const cardHead = el("div", "cam-head", card);
+    const nameBox = el("span", null, cardHead);
+    el("span", "cam-name", nameBox).textContent = cam.name;
+    el("span", "cam-alt", nameBox).textContent = " " + cam.alt;
+    const favoriteButton = el("button", "favorite-toggle", cardHead);
+    favoriteButton.type = "button";
+    favoriteButton.setAttribute("aria-label", (favorites.has(cam.id) ? "Retirer " : "Ajouter ") + cam.name + " des favoris");
+    favoriteButton.setAttribute("aria-pressed", favorites.has(cam.id) ? "true" : "false");
+    favoriteButton.textContent = favorites.has(cam.id) ? "★ Favori" : "☆ Favori";
+    favoriteButton.addEventListener("click", () => {
+      if (favorites.has(cam.id)) favorites.delete(cam.id);
+      else favorites.add(cam.id);
+      try { localStorage.setItem(favoriteStorageKey, JSON.stringify([...favorites])); } catch { /* Storage may be disabled. */ }
+      favoriteButton.setAttribute("aria-pressed", favorites.has(cam.id) ? "true" : "false");
+      favoriteButton.setAttribute("aria-label", (favorites.has(cam.id) ? "Retirer " : "Ajouter ") + cam.name + " des favoris");
+      favoriteButton.textContent = favorites.has(cam.id) ? "★ Favori" : "☆ Favori";
+      applyFilters();
+    });
+
+    if (cam.type === "image") {
+      const fsButton = el("button", "fs-toggle", cardHead);
+      fsButton.type = "button";
+      fsButton.hidden = true; // affiché dès que l'image est chargée
+      fsButton.textContent = "⛶ Plein écran";
+      fsButton.setAttribute("aria-label", "Afficher " + cam.name + " en plein écran");
+      const status = el("span", "status", cardHead);
+      status.setAttribute("aria-live", "polite");
+      const wrap = el("div", "img-wrap pano", card);
+      const img = el("img", null, wrap);
+      img.alt = "Webcam " + cam.name + " — " + station.name;
+      const spinner = el("div", "spinner", wrap);
+      const errMsg = el("div", "err-msg hidden", wrap);
+      errMsg.textContent = "Image indisponible après plusieurs tentatives. Réessayez avec « Actualiser les images ».";
+      errMsg.setAttribute("role", "status");
+      const hint = el("p", "pano-hint", card);
+      hint.hidden = true;
+      hint.textContent = "↔ Faites glisser l’image, ou touchez-la pour l’agrandir.";
+
+      img.addEventListener("load", () => {
+        spinner.classList.add("hidden");
+        errMsg.classList.add("hidden");
+        img.classList.remove("hidden");
+        updatePano(entry);
+        fsButton.hidden = false;
+        viewer.refresh(entry);
+        entry.retryCount = 0;
+        if (entry.retryTimer) { clearTimeout(entry.retryTimer); entry.retryTimer = null; }
+        status.textContent = "Actualisée à " + new Date().toLocaleTimeString("fr-FR");
+        status.className = "status ok";
+      });
+      const entry = { cam, img, wrap, hint, spinner, status, errMsg, retryCount: 0, retryTimer: null, centered: false };
+      img.addEventListener("error", () => {
+        spinner.classList.add("hidden");
+        if (entry.retryCount < 3) {
+          entry.retryCount += 1;
+          errMsg.classList.add("hidden");
+          status.textContent = "Échec — nouvelle tentative " + entry.retryCount + "/3…";
+          status.className = "status";
+          entry.retryTimer = setTimeout(() => {
+            entry.retryTimer = null;
+            loadCam(entry, true);
+          }, 3000 * Math.pow(2, entry.retryCount - 1));
+        } else {
+          errMsg.classList.remove("hidden");
+          status.textContent = "Erreur de chargement";
+          status.className = "status err";
+        }
+      });
+
+      entry.card = card;
+      entry.loaded = false;
+      img.addEventListener("click", () => viewer.open(entry));
+      fsButton.addEventListener("click", () => viewer.open(entry));
+      imageEntries.push(entry);
+    } else {
+      el("span", "status", cardHead).textContent = "Direct";
+      const wrap = el("div", "frame-wrap", card);
+      const frame = el("iframe", null, wrap);
+      frame.src = cam.url;
+      frame.title = "Webcam " + cam.name + " — " + station.name;
+      frame.loading = "lazy";
+      frame.allowFullscreen = true;
+      const fallback = el("p", "frame-fallback", card);
+      fallback.append("Le lecteur ne s’affiche pas ? ");
+      const providerLink = el("a", null, fallback);
+      providerLink.href = cam.url;
+      providerLink.target = "_blank";
+      providerLink.rel = "noopener noreferrer";
+      providerLink.textContent = "Ouvrir cette webcam chez le fournisseur";
+    }
+  }
+}
+
+function applyFilters() {
+  const stationId = stationFilter.value;
+  const query = document.getElementById("camera-search").value.trim().toLocaleLowerCase("fr");
+  const favoritesOnly = document.getElementById("favorites-only").checked;
+  let visibleCount = 0;
+
+  for (const station of STATIONS) {
+    const section = document.getElementById(station.id);
+    let stationHasVisibleCamera = false;
+    for (const cam of station.cams) {
+      const card = cameraCards.get(cam.id);
+      const matches = (stationId === "all" || station.id === stationId)
+        && card.dataset.cameraName.includes(query)
+        && (!favoritesOnly || favorites.has(cam.id));
+      card.hidden = !matches;
+      if (matches) { stationHasVisibleCamera = true; visibleCount += 1; }
+    }
+    section.hidden = !stationHasVisibleCamera;
+  }
+
+  let emptyState = document.getElementById("empty-state");
+  if (visibleCount === 0) {
+    if (!emptyState) {
+      emptyState = el("p", "empty-state", root);
+      emptyState.id = "empty-state";
+      emptyState.setAttribute("role", "status");
+    }
+    emptyState.textContent = "Aucune webcam ne correspond à ces filtres.";
+  } else if (emptyState) {
+    emptyState.remove();
+  }
+}
+
+document.getElementById("camera-search").addEventListener("input", applyFilters);
+stationFilter.addEventListener("change", applyFilters);
+document.getElementById("favorites-only").addEventListener("change", applyFilters);
+applyFilters();
+
+// Sur petit écran, le panorama déborde : on affiche l'indication et on centre la vue au premier chargement.
+function updatePano(entry) {
+  const { wrap, hint } = entry;
+  const overflows = wrap.scrollWidth > wrap.clientWidth + 8;
+  hint.hidden = !overflows;
+  if (overflows && !entry.centered) {
+    wrap.scrollLeft = (wrap.scrollWidth - wrap.clientWidth) / 2;
+    entry.centered = true;
+  }
+}
+window.addEventListener("resize", () => {
+  imageEntries.forEach((entry) => { if (entry.loaded) updatePano(entry); });
+});
+
+function loadCam(entry, isRetry = false) {
+  const { cam, img, spinner, status } = entry;
+  entry.loaded = true;
+  if (!isRetry) {
+    entry.retryCount = 0;
+    if (entry.retryTimer) { clearTimeout(entry.retryTimer); entry.retryTimer = null; }
+  }
+  spinner.classList.remove("hidden");
+  entry.errMsg.classList.add("hidden");
+  status.textContent = "Chargement…";
+  status.className = "status";
+  // URL API permet d'ajouter le paramètre même si la source change de format.
+  const imageUrl = new URL(cam.url);
+  imageUrl.searchParams.set("t", Date.now());
+  img.src = imageUrl.toString();
+}
+
+function loadAll() {
+  const loadedEntries = imageEntries.filter((entry) => entry.loaded);
+  loadedEntries.forEach((entry) => loadCam(entry));
+  if (loadedEntries.length > 0) {
+    document.getElementById("refresh-time").textContent =
+      "Dernière actualisation des images affichées : " + new Date().toLocaleTimeString("fr-FR");
+  }
+}
+
+if ("IntersectionObserver" in window) {
+  const imageObserver = new IntersectionObserver((observedEntries, observer) => {
+    for (const observed of observedEntries) {
+      if (!observed.isIntersecting) continue;
+      const entry = imageEntries.find((item) => item.card === observed.target);
+      if (entry && !entry.loaded) loadCam(entry);
+      observer.unobserve(observed.target);
+    }
+  }, { rootMargin: "300px 0px" });
+  imageEntries.forEach((entry) => imageObserver.observe(entry.card));
+} else {
+  imageEntries.forEach((entry) => loadCam(entry));
+}
+
+document.getElementById("refresh-all").addEventListener("click", loadAll);
+
+let timer = null;
+function applyFreq() {
+  if (timer) { clearInterval(timer); timer = null; }
+  const ms = parseInt(document.getElementById("freq").value, 10);
+  if (ms > 0) timer = setInterval(loadAll, ms);
+}
+document.getElementById("freq").addEventListener("change", applyFreq);
+
+applyFreq();
+
+// Économise les données mobiles : pas d'actualisation quand l'onglet est en arrière-plan.
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    if (timer) { clearInterval(timer); timer = null; }
+  } else if (parseInt(document.getElementById("freq").value, 10) > 0) {
+    loadAll();
+    applyFreq();
+  }
+});
+</script>
+
+</body>
+</html>
